@@ -33,8 +33,8 @@ import (
 var RunAllCephCommandsInToolboxPod string
 
 const (
-	// AdminUsername is the name of the admin user
-	AdminUsername = "client.admin"
+	// AdminUsername is the name of the operator admin user
+	AdminUsername = "client.rookoperator"
 	// CephTool is the name of the CLI tool for 'ceph'
 	CephTool = "ceph"
 	// RBDTool is the name of the CLI tool for 'rbd'

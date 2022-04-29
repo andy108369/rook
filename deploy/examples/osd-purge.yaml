@@ -55,12 +55,12 @@ spec:
                 configMapKeyRef:
                   key: data
                   name: rook-ceph-mon-endpoints
-            - name: ROOK_CEPH_USERNAME
+            - name: ROOK_OPERATOR_CEPH_USERNAME
               valueFrom:
                 secretKeyRef:
                   key: ceph-username
                   name: rook-ceph-mon
-            - name: ROOK_CEPH_SECRET
+            - name: ROOK_OPERATOR_CEPH_SECRET
               valueFrom:
                 secretKeyRef:
                   key: ceph-secret

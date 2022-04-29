@@ -60,7 +60,7 @@ func TestCreateClusterSecrets(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, -1, maxID)
 	require.NotNil(t, info)
-	assert.Equal(t, "client.admin", info.CephCred.Username)
+	assert.Equal(t, "client.rookoperator", info.CephCred.Username)
 	assert.Equal(t, adminSecret, info.CephCred.Secret)
 	assert.NotEqual(t, "", info.FSID)
 	assert.NotNil(t, mapping)
@@ -81,7 +81,7 @@ func TestCreateClusterSecrets(t *testing.T) {
 	// Check that the cluster info can now be loaded
 	info, _, _, err = CreateOrLoadClusterInfo(context, ctx, namespace, ownerInfo)
 	assert.NoError(t, err)
-	assert.Equal(t, "client.admin", info.CephCred.Username)
+	assert.Equal(t, "client.rookoperator", info.CephCred.Username)
 	assert.Equal(t, adminSecret, info.CephCred.Secret)
 
 	// Fail to load the external cluster if the admin placeholder is specified
