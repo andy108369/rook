@@ -75,7 +75,8 @@ func FinalizeCephCommandArgs(command string, clusterInfo *ClusterInfo, args []st
 	if RunAllCephCommandsInToolboxPod != "" {
 		toolArgs := []string{"exec", "-i", RunAllCephCommandsInToolboxPod, "-n", clusterInfo.Namespace,
 			"--", "timeout", timeout, command}
-		return Kubectl, append(toolArgs, args...)
+		toolArgs = append(toolArgs, args...)
+		return Kubectl, toolArgs
 	}
 
 	// Append the args to find the config and keyring

@@ -140,6 +140,7 @@ func (r *ReconcileCephNFS) addRADOSConfigFile(n *cephv1.CephNFS, name string) er
 		"--pool", n.Spec.RADOS.Pool,
 		"--namespace", n.Spec.RADOS.Namespace,
 		"--conf", cephclient.CephConfFilePath(r.context.ConfigDir, n.Namespace),
+		"--name", r.clusterInfo.CephCred.Username,
 	}
 	err := r.context.Executor.ExecuteCommand(cmd, append(args, "stat", config)...)
 	if err == nil {
@@ -172,7 +173,7 @@ func (r *ReconcileCephNFS) removeServerFromDatabase(nfs *cephv1.CephNFS, name st
 func (r *ReconcileCephNFS) runGaneshaRadosGrace(nfs *cephv1.CephNFS, name, action string) error {
 	nodeID := getNFSNodeID(nfs, name)
 	cmd := ganeshaRadosGraceCmd
-	args := []string{"--pool", nfs.Spec.RADOS.Pool, "--ns", nfs.Spec.RADOS.Namespace, action, nodeID}
+	args := []string{"--cephconf", cephclient.CephConfFilePath(r.context.ConfigDir, nfs.Namespace), "--userid", "rookoperator", "--pool", nfs.Spec.RADOS.Pool, "--ns", nfs.Spec.RADOS.Namespace, action, nodeID}
 	env := []string{fmt.Sprintf("CEPH_CONF=%s", cephclient.CephConfFilePath(r.context.ConfigDir, nfs.Namespace))}
 
 	return r.context.Executor.ExecuteCommandWithEnv(env, cmd, args...)

@@ -68,6 +68,11 @@ const (
 var (
 	ClusterInfoNoClusterNoSecret = errors.New("not expected to create new cluster info and did not find existing secret")
 	externalConnectionRetry      = 60 * time.Second
+	adminCapArgs                 = []string{
+		"--cap", "mon", "'allow *'",
+		"--cap", "osd", "'allow *'",
+		"--cap", "mgr", "'allow *'",
+		"--cap", "mds", "'allow'"}
 )
 
 // Mapping is mon node and port mapping
@@ -127,6 +132,19 @@ func CreateOrLoadClusterInfo(clusterdContext *clusterd.Context, context context.
 		if cephUsername, ok := secrets.Data[CephUsernameKey]; ok {
 			clusterInfo.CephCred.Username = string(cephUsername)
 			clusterInfo.CephCred.Secret = string(secrets.Data[CephUserSecretKey])
+			// for upgrade cluster get rookoperator keyrings
+			operatorCred, err := genAdminKeyrings(clusterdContext, namespace)
+			if err != nil {
+				return nil, maxMonID, monMapping, errors.Wrap(err, "failed to create rookoperator keyring")
+			}
+			clusterInfo.CephCred.Username = operatorCred.Username
+			clusterInfo.CephCred.Secret = operatorCred.Secret
+
+			secrets.Data[CephUsernameKey] = []byte(operatorCred.Username)
+			secrets.Data[CephUserSecretKey] = []byte(operatorCred.Secret)
+			if _, err = clusterdContext.Clientset.CoreV1().Secrets(namespace).Update(context, secrets, metav1.UpdateOptions{}); err != nil {
+				return nil, maxMonID, monMapping, errors.Wrap(err, "failed to update mon secrets")
+			}
 		} else if adminSecretKey, ok := secrets.Data[adminSecretNameKey]; ok {
 			clusterInfo.CephCred.Username = cephclient.AdminUsername
 			clusterInfo.CephCred.Secret = string(adminSecretKey)
@@ -170,6 +188,21 @@ func CreateOrLoadClusterInfo(clusterdContext *clusterd.Context, context context.
 	return clusterInfo, maxMonID, monMapping, nil
 }
 
+func genAdminKeyrings(context *clusterd.Context, namespace string) (*cephclient.CephCred, error) {
+	dir := path.Join(context.ConfigDir, namespace)
+	if err := os.MkdirAll(dir, 0744); err != nil {
+		return nil, errors.Wrapf(err, "failed to create dir %s", dir)
+	}
+
+	operatorSecret, err := genSecret(context.Executor, dir, cephclient.AdminUsername, adminCapArgs)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to generate rookoperator user")
+	}
+
+	return &cephclient.CephCred{Username: cephclient.AdminUsername, Secret: operatorSecret},
+		nil
+}
+
 // create new cluster info (FSID, shared keys)
 func createNamedClusterInfo(context *clusterd.Context, namespace string) (*cephclient.ClusterInfo, error) {
 	fsid, err := uuid.NewRandom()
@@ -189,12 +222,7 @@ func createNamedClusterInfo(context *clusterd.Context, namespace string) (*cephc
 	}
 
 	// generate the admin secret if one was not provided at the command line
-	args := []string{
-		"--cap", "mon", "'allow *'",
-		"--cap", "osd", "'allow *'",
-		"--cap", "mgr", "'allow *'",
-		"--cap", "mds", "'allow'"}
-	adminSecret, err := genSecret(context.Executor, dir, cephclient.AdminUsername, args)
+	adminSecret, err := genSecret(context.Executor, dir, cephclient.AdminUsername, adminCapArgs)
 	if err != nil {
 		return nil, err
 	}

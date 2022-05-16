@@ -34,7 +34,7 @@ write_endpoints() {
 [global]
 mon_host = ${mon_endpoints}
 
-[client.rooktoolbox]
+[client.rookoperator]
 keyring = ${KEYRING_FILE}
 EOF
 }
@@ -59,8 +59,8 @@ watch_endpoints() {
 
 # create the keyring file
 cat <<EOF > ${KEYRING_FILE}
-[${ROOK_OPERATOR_CEPH_USERNAME}]
-key = ${ROOK_OPERATOR_CEPH_SECRET}
+[${ROOK_CEPH_USERNAME}]
+key = ${ROOK_CEPH_SECRET}
 EOF
 
 # write the initial config file

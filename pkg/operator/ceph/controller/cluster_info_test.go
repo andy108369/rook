@@ -91,7 +91,7 @@ func TestCreateClusterSecrets(t *testing.T) {
 	_, _, _, err = CreateOrLoadClusterInfo(context, ctx, namespace, ownerInfo)
 	assert.Error(t, err)
 
-	// Load the external cluster with the legacy external creds
+	// Load the external cluster with the new creds
 	secret.Name = OperatorCreds
 	secret.Data = map[string][]byte{
 		"userID":  []byte("testid"),
@@ -101,6 +101,6 @@ func TestCreateClusterSecrets(t *testing.T) {
 	assert.NoError(t, err)
 	info, _, _, err = CreateOrLoadClusterInfo(context, ctx, namespace, ownerInfo)
 	assert.NoError(t, err)
-	assert.Equal(t, "testid", info.CephCred.Username)
-	assert.Equal(t, "testkey", info.CephCred.Secret)
+	assert.Equal(t, "client.rookoperator", info.CephCred.Username)
+	assert.Equal(t, adminSecret, info.CephCred.Secret)
 }
