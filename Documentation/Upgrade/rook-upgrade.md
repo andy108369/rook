@@ -54,6 +54,7 @@ those releases.
 * MDS liveness and startup probes are now configured by the CephFilesystem resource instead of
   CephCluster. Upgrade instructions are [below](#mds-liveness-and-startup-probes).
 
+<<<<<<< HEAD
 * Rook no longer deploys Prometheus rules from the operator. If you have been relying on Rook to
   deploy prometheus rules in the past, please follow the upgrade instructions [below](#prometheus).
 
@@ -65,6 +66,8 @@ those releases.
 * If you use Helm and your operator is in a different namespace from the cluster and object storage class is enabled
   you have to delete the object storage class before upgrading. [#10153](https://github.com/rook/rook/issues/10153)
 
+=======
+>>>>>>> 1e9bbae58 (docs: move PSPs from common.yaml to psp.yaml)
 ## Considerations
 
 With this upgrade guide, there are a few notes to consider:
